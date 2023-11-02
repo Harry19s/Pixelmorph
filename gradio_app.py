@@ -20,28 +20,28 @@ SIZE_TO_CLICK_SIZE = {
 }
 
 CKPT_SIZE = {
-    'stylegan2/stylegan2-ffhq-config-f.pkl': 1024,
-    'stylegan2/stylegan2-cat-config-f.pkl': 256,
-    'stylegan2/stylegan2-church-config-f.pkl': 256,
-    'stylegan2/stylegan2-horse-config-f.pkl': 256,
-    'ada/ffhq.pkl': 1024,
-    'ada/afhqcat.pkl': 512,
-    'ada/afhqdog.pkl': 512,
-    'ada/afhqwild.pkl': 512,
-    'ada/brecahad.pkl': 512,
-    'ada/metfaces.pkl': 512,
-    'human/stylegan_human_v2_512.pkl': 512,
-    'human/stylegan_human_v2_1024.pkl': 1024,
-    'self_distill/bicycles_256_pytorch.pkl': 256,
-    'self_distill/dogs_1024_pytorch.pkl': 1024,
-    'self_distill/elephants_512_pytorch.pkl': 512,
-    'self_distill/giraffes_512_pytorch.pkl': 512,
-    'self_distill/horses_256_pytorch.pkl': 256,
-    'self_distill/lions_512_pytorch.pkl': 512,
-    'self_distill/parrots_512_pytorch.pkl': 512,
+    # 'stylegan2/stylegan2-ffhq-config-f.pkl': 1024,
+    # 'stylegan2/stylegan2-cat-config-f.pkl': 256,
+    # 'stylegan2/stylegan2-church-config-f.pkl': 256,
+    # 'stylegan2/stylegan2-horse-config-f.pkl': 256,
+    'ada/ffhq.pkl': 1024#,
+    # 'ada/afhqcat.pkl': 512,
+    # 'ada/afhqdog.pkl': 512,
+    # 'ada/afhqwild.pkl': 512,
+    # 'ada/brecahad.pkl': 512,
+    # 'ada/metfaces.pkl': 512,
+    # 'human/stylegan_human_v2_512.pkl': 512,
+    # 'human/stylegan_human_v2_1024.pkl': 1024,
+    # 'self_distill/bicycles_256_pytorch.pkl': 256,
+    # 'self_distill/dogs_1024_pytorch.pkl': 1024,
+    # 'self_distill/elephants_512_pytorch.pkl': 512,
+    # 'self_distill/giraffes_512_pytorch.pkl': 512,
+    # 'self_distill/horses_256_pytorch.pkl': 256,
+    # 'self_distill/lions_512_pytorch.pkl': 512,
+    # 'self_distill/parrots_512_pytorch.pkl': 512,
 }
 
-DEFAULT_CKPT = 'ada/afhqcat.pkl'
+DEFAULT_CKPT = 'ada/ffhq.pkl'
 
 
 def to_image(tensor):
@@ -207,12 +207,8 @@ def main():
     with gr.Blocks() as demo:
         gr.Markdown(
             """
-            # DragGAN
+            # PixelMorph             
             
-            Unofficial implementation of [Drag Your GAN: Interactive Point-based Manipulation on the Generative Image Manifold](https://vcai.mpi-inf.mpg.de/projects/DragGAN/)
-            
-            [Our Implementation](https://github.com/Zeqiang-Lai/DragGAN) | [Official Implementation](https://github.com/XingangPan/DragGAN) (Not released yet)
-
             ## Tutorial
             
             1. (Optional) Draw a mask indicate the movable region.
@@ -224,17 +220,6 @@ def main():
             - Handle points (Blue): the point you want to drag.
             - Target points (Red): the destination you want to drag towards to.
             
-            ## Primary Support of Custom Image.
-            
-            - We now support dragging user uploaded image by GAN inversion.
-            - **Please upload your image at `Setup Handle Points` pannel.** Upload it from `Draw a Mask` would cause errors for now.
-            - Due to the limitation of GAN inversion, 
-                - You might wait roughly 1 minute to see the GAN version of the uploaded image.
-                - The shown image might be slightly difference from the uploaded one.
-                - It could also fail to invert the uploaded image and generate very poor results.
-                - Idealy, you should choose the closest model of the uploaded image. For example, choose `stylegan2-ffhq-config-f.pkl` for human face. `stylegan2-cat-config-f.pkl` for cat.
-                
-            > Please fire an issue if you have encounted any problem. Also don't forgot to give a star to the [Official Repo](https://github.com/XingangPan/DragGAN), [our project](https://github.com/Zeqiang-Lai/DragGAN) could not exist without it.
             """,
         )
         G = draggan.load_model(utils.get_path(DEFAULT_CKPT), device=device)
@@ -277,8 +262,8 @@ def main():
                     with gr.Row():
                         btn = gr.Button('Drag it', variant='primary')
 
-                with gr.Accordion('Save', visible=False) as save_panel:
-                    files = gr.Files(value=[])
+                # with gr.Accordion('Save', visible=False) as save_panel:
+                #     files = gr.Files(value=[])
 
                 progress = gr.Slider(value=0, maximum=20, label='Progress', interactive=False)
 
@@ -290,12 +275,13 @@ def main():
                         mask = gr.ImageMask(img, label='Mask').style(height=512, width=512)
 
         image.select(on_click, [image, target_point, points, size], [image, target_point])
-        image.upload(on_image_change, [model, size, image], [image, mask, state, points, target_point])
-        mask.upload(on_mask_change, [mask], [image])
-        btn.click(on_drag, inputs=[model, points, max_iters, state, size, mask, lr_box], outputs=[image, state, progress]).then(
+        # image.upload(on_image_change, [model, size, image], [image, mask, state, points, target_point])
+        # mask.upload(on_mask_change, [mask], [image])
+        btn.click(on_drag, inputs=[model, points, max_iters, state, size, mask, lr_box], outputs=[image, state, progress])
+        '''.then(
             on_show_save, outputs=save_panel).then(
             on_save_files, inputs=[image, state], outputs=[files]
-        )
+        )'''
         reset_btn.click(on_reset, inputs=[points, image, state], outputs=[points, image, target_point])
         undo_btn.click(on_undo, inputs=[points, image, state, size], outputs=[points, image, target_point])
         model_dropdown.change(on_change_model, inputs=[model_dropdown, model], outputs=[model, state, image, mask, size])
